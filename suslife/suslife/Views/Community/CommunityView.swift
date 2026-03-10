@@ -30,7 +30,7 @@ struct CommunityView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
             }
-            .navigationTitle("🌍 Community")
+            .navigationTitle("Community")
             .task {
                 await loadLeaderboard()
             }

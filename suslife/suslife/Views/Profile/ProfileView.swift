@@ -25,7 +25,7 @@ struct ProfileView: View {
             }
             .padding()
         }
-        .navigationTitle("👤 Profile")
+        .navigationTitle("Profile")
         .task {
             await viewModel.loadData()
         }
@@ -74,7 +74,7 @@ struct StatsCard: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            Text("📊 Your Stats")
+            Text("Your Stats")
                 .font(Fonts.title3)
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -136,7 +136,7 @@ struct AchievementWall: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("🏅 Achievements")
+                Text("Achievements")
                     .font(Fonts.title3)
                     .fontWeight(.semibold)
                 

@@ -41,7 +41,7 @@ struct DashboardView: View {
                 }
                 .padding()
             }
-            .navigationTitle("🌱 Sustainable Life")
+            .navigationTitle("Sustainable Life")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: ProfileView()) {
@@ -76,22 +76,29 @@ struct TodayFootprintCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Today's Footprint")
-                .font(Fonts.headline)
-                .foregroundColor(AppColors.textSecondary)
-            
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(String(format: "%.1f", todayCO2))
-                    .font(Fonts.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(AppColors.primary)
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Today's Footprint")
+                        .font(Fonts.headline)
+                        .foregroundColor(AppColors.textSecondary)
+                    
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(String(format: "%.1f", todayCO2))
+                            .font(Fonts.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(AppColors.primary)
+                        
+                        Text("lbs CO₂")
+                            .font(Fonts.body)
+                            .foregroundColor(AppColors.textSecondary)
+                    }
+                }
                 
-                Text("lbs CO₂")
-                    .font(Fonts.body)
-                    .foregroundColor(AppColors.textSecondary)
+                Spacer()
+                
+                CircularProgressRing(progress: progress, size: 70)
             }
             
-            // Change indicator
             if changePercent != 0 {
                 HStack(spacing: 4) {
                     Image(systemName: changePercent < 0 ? "arrow.down.right" : "arrow.up.right")
@@ -103,7 +110,6 @@ struct TodayFootprintCard: View {
                 }
             }
             
-            // Progress bar
             VStack(spacing: 8) {
                 ProgressView(value: progress)
                     .tint(progress > 0.8 ? AppColors.warning : AppColors.primary)
@@ -129,6 +135,39 @@ struct TodayFootprintCard: View {
     }
 }
 
+struct CircularProgressRing: View {
+    let progress: Double
+    let size: CGFloat
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(AppColors.primary.opacity(0.2), lineWidth: 8)
+                .frame(width: size, height: size)
+            
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    AppColors.primary,
+                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                )
+                .frame(width: size, height: size)
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut(duration: 0.5), value: progress)
+            
+            VStack(spacing: 2) {
+                Text(String(format: "%.0f%%", progress * 100))
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(AppColors.textPrimary)
+                
+                Text("goal")
+                    .font(.system(size: 10, design: .rounded))
+                    .foregroundColor(AppColors.textSecondary)
+            }
+        }
+    }
+}
+
 // MARK: - Weekly Trend Chart
 
 struct WeeklyTrendChart: View {
@@ -140,7 +179,7 @@ struct WeeklyTrendChart: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("📊 This Week")
+            Text("This Week")
                 .font(Fonts.title3)
                 .fontWeight(.semibold)
             
@@ -240,7 +279,7 @@ struct RecommendationsCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("💡 Tips to Reduce More")
+            Text("Tips to Reduce More")
                 .font(Fonts.title3)
                 .fontWeight(.semibold)
             
@@ -294,7 +333,7 @@ struct RecentAchievementsCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("🏆 Recent Achievements")
+            Text("Recent Achievements")
                 .font(Fonts.title3)
                 .fontWeight(.semibold)
             

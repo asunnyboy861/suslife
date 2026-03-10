@@ -48,12 +48,10 @@
 		<string>remote-notification</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location to track transportation activities (optional). Your location data is stored privately on your device.</string>
+	<string>SusLife uses your location to track transportation activities. Your location data is stored privately on your device.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>We can import your workout data to track carbon footprint from exercises.</string>
+	<string>SusLife reads your walking, cycling, and step data from Apple Health to calculate your carbon footprint savings from active transportation.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>We can save your activities to Apple Health.</string>
-	<key>UIUserInterfaceStyle</key>
-	<string>Light</string>
+	<string>SusLife does not write data to Apple Health.</string>
 </dict>
 </plist>

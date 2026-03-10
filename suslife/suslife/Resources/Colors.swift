@@ -2,13 +2,13 @@
 //  Colors.swift
 //  suslife
 //
-//  Design System Colors - US Market
+//  Design System Colors - US Market (Dark Mode Supported)
 //
 
 import SwiftUI
 
 struct AppColors {
-    // MARK: - Primary Colors
+    // MARK: - Primary Colors (Brand colors - do not change with dark mode)
     
     /// Primary green - main brand color
     static let primary = Color(hex: "2E7D32")
@@ -33,22 +33,33 @@ struct AppColors {
     /// Error color for alerts
     static let error = Color(hex: "EF5350")
     
-    // MARK: - Neutral Colors
+    // MARK: - Adaptive Colors (Dark Mode Supported)
+    // Using UIColor system colors for automatic dark mode adaptation
     
-    /// Background color
-    static let background = Color(hex: "F5F5F5")
+    /// Background color - adapts to dark mode
+    static var background: Color {
+        Color(uiColor: UIColor.systemGroupedBackground)
+    }
     
-    /// Card background
-    static let cardBackground = Color(hex: "FFFFFF")
+    /// Card background - adapts to dark mode
+    static var cardBackground: Color {
+        Color(uiColor: UIColor.secondarySystemGroupedBackground)
+    }
     
-    /// Text primary
-    static let textPrimary = Color(hex: "212121")
+    /// Text primary - adapts to dark mode
+    static var textPrimary: Color {
+        Color(uiColor: UIColor.label)
+    }
     
-    /// Text secondary
-    static let textSecondary = Color(hex: "757575")
+    /// Text secondary - adapts to dark mode
+    static var textSecondary: Color {
+        Color(uiColor: UIColor.secondaryLabel)
+    }
     
-    /// Divider color
-    static let divider = Color(hex: "E0E0E0")
+    /// Divider color - adapts to dark mode
+    static var divider: Color {
+        Color(uiColor: UIColor.separator)
+    }
     
     // MARK: - Chart Colors
     

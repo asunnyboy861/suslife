@@ -39,7 +39,7 @@ struct SettingsView: View {
                 
                 legalSection
             }
-            .navigationTitle("⚙️ Settings")
+            .navigationTitle("Settings")
             .sheet(isPresented: $showingExportSheet) {
                 ExportView()
             }
