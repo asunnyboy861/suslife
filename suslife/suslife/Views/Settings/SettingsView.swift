@@ -235,24 +235,40 @@ struct ReminderTimePickerView: View {
     
     var body: some View {
         NavigationView {
-            DatePicker(
-                "Reminder Time",
-                selection: Binding(
-                    get: {
-                        var components = DateComponents()
-                        components.hour = hour
-                        components.minute = minute
-                        return Calendar.current.date(from: components) ?? Date()
-                    },
-                    set: { newDate in
-                        let components = Calendar.current.dateComponents([.hour, .minute], from: newDate)
-                        hour = components.hour ?? 9
-                        minute = components.minute ?? 0
+            Form {
+                Section {
+                    HStack(spacing: 0) {
+                        // Hour picker
+                        Picker("Hour", selection: $hour) {
+                            ForEach(0..<24, id: \.self) { hour in
+                                Text(String(format: "%02d", hour))
+                                    .tag(hour)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .labelsHidden()
+                        .frame(maxWidth: .infinity)
+                        
+                        Text(":")
+                            .font(.title2)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 8)
+                        
+                        // Minute picker
+                        Picker("Minute", selection: $minute) {
+                            ForEach(0..<60, id: \.self) { minute in
+                                Text(String(format: "%02d", minute))
+                                    .tag(minute)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .labelsHidden()
+                        .frame(maxWidth: .infinity)
                     }
-                ),
-                displayedComponents: .hourAndMinute
-            )
-            .datePickerStyle(.wheel)
+                    .frame(height: 200)
+                }
+            }
             .navigationTitle("Reminder Time")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
