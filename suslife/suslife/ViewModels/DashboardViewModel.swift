@@ -34,6 +34,10 @@ class DashboardViewModel: ObservableObject {
         errorMessage = nil
         
         do {
+            // Load user profile first to get the correct dailyGoal
+            try await loadUserProfile()
+            
+            // Load activity data
             todayCO2 = try await repository.fetchTodayTotalCO2()
             weeklyData = try await repository.fetchWeeklyTrend()
             await calculateChangePercent()
@@ -47,6 +51,12 @@ class DashboardViewModel: ObservableObject {
     
     func refresh() async {
         await loadData()
+    }
+    
+    /// Load user profile and update dailyGoal
+    private func loadUserProfile() async throws {
+        let profile = try await userProfileRepository.getUserProfile()
+        dailyGoal = profile.dailyCO2Goal
     }
     
     private func calculateChangePercent() async {

@@ -14,6 +14,11 @@ struct OnboardingView: View {
     @State private var notificationsEnabled = false
     @State private var healthKitEnabled = false
     
+    // Loading and error state
+    @State private var isProcessing = false
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
+    
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             icon: "leaf.fill",
@@ -55,8 +60,42 @@ struct OnboardingView: View {
                         .transition(.opacity)
                 }
             }
+            
+            // Loading overlay
+            if isProcessing {
+                loadingOverlay
+                    .transition(.opacity)
+                    .zIndex(1000)
+            }
         }
         .animation(.easeInOut, value: currentPage)
+        .animation(.easeInOut, value: isProcessing)
+        .alert("Setup Incomplete", isPresented: $showErrorAlert) {
+            Button("Try Again") {
+                showErrorAlert = false
+            }
+        } message: {
+            Text(errorMessage)
+        }
+    }
+    
+    // Loading overlay view
+    private var loadingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 16) {
+                ProgressView()
+                    .scaleEffect(1.2)
+                Text("Setting up your profile...")
+                    .font(Fonts.body)
+                    .foregroundColor(.white)
+            }
+            .padding(32)
+            .background(AppColors.cardBackground)
+            .cornerRadius(16)
+        }
     }
     
     @ViewBuilder
@@ -173,19 +212,33 @@ struct OnboardingView: View {
             
             Spacer()
             
-            Button(action: completeOnboarding) {
+            startTrackingButton
+        }
+    }
+    
+    // Start Tracking button with loading state
+    private var startTrackingButton: some View {
+        Button(action: handleCompleteOnboarding) {
+            HStack {
+                if isProcessing {
+                    ProgressView()
+                        .tint(.white)
+                        .scaleEffect(0.8)
+                }
+                
                 Text("Start Tracking")
                     .font(Fonts.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(AppColors.primary)
-                    .cornerRadius(12)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 40)
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(isProcessing ? AppColors.primary.opacity(0.7) : AppColors.primary)
+            .cornerRadius(12)
         }
+        .disabled(isProcessing)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 40)
     }
     
     private var dailyGoalSection: some View {
@@ -257,6 +310,62 @@ struct OnboardingView: View {
         .cornerRadius(16)
     }
     
+    private func handleCompleteOnboarding() {
+        Task {
+            isProcessing = true
+            
+            do {
+                // 1. Request notification permissions (non-blocking)
+                if notificationsEnabled {
+                    let service = NotificationService.shared
+                    let authorized = await service.requestAuthorization()
+                    if authorized {
+                        await service.scheduleDailyReminder(at: 20, minute: 0)
+                    }
+                }
+                
+                // 2. Request HealthKit permissions (non-blocking)
+                if healthKitEnabled {
+                    let healthService = HealthKitService()
+                    _ = await healthService.requestAuthorization()
+                }
+                
+                // 3. Save user profile using repository (critical)
+                try await saveUserProfileWithRepository()
+                
+                // 4. Update onboarding state
+                OnboardingState.shared.completeOnboarding(dailyGoal: dailyGoal)
+                
+                isProcessing = false
+                
+                // 5. Close onboarding with animation
+                withAnimation {
+                    isPresented = false
+                }
+                
+            } catch {
+                isProcessing = false
+                errorMessage = error.localizedDescription
+                showErrorAlert = true
+            }
+        }
+    }
+    
+    // Save user profile using repository instead of direct CoreData access
+    private func saveUserProfileWithRepository() async throws {
+        let repository = LocalUserRepository()
+        
+        let settings = UserProfileSettings(
+            dailyCO2Goal: dailyGoal,
+            notificationsEnabled: notificationsEnabled,
+            healthKitEnabled: healthKitEnabled,
+            unitsSystem: "imperial"
+        )
+        
+        _ = try await repository.createUserProfile(settings: settings)
+    }
+    
+    // Old function kept for reference (will be removed later)
     private func completeOnboarding() {
         Task {
             if notificationsEnabled {
@@ -281,6 +390,7 @@ struct OnboardingView: View {
         }
     }
     
+    // Old function kept for reference (will be removed later)
     private func saveUserProfile() async {
         let context = CoreDataStack.shared.mainContext
         await context.perform {

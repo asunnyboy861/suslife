@@ -8,19 +8,54 @@
 import Foundation
 import CoreData
 
+/// Local CoreData implementation of UserRepositoryProtocol
 final class LocalUserRepository: UserRepositoryProtocol {
     
+    // MARK: - Properties
+    
     private let coreDataStack: CoreDataStack
+    
+    // MARK: - Initialization
     
     init(coreDataStack: CoreDataStack = .shared) {
         self.coreDataStack = coreDataStack
     }
+    
+    // MARK: - UserRepositoryProtocol Methods
     
     func getUserProfile() async throws -> UserProfile {
         let context = coreDataStack.mainContext
         
         return try await context.perform {
             UserProfile.getCurrent(in: context)
+        }
+    }
+    
+    func createUserProfile(settings: UserProfileSettings) async throws -> UserProfile {
+        let context = coreDataStack.mainContext
+        
+        return try await context.perform {
+            // Use getCurrent to ensure singleton pattern
+            let profile = UserProfile.getCurrent(in: context)
+            
+            // Update profile with new settings
+            profile.dailyCO2Goal = settings.dailyCO2Goal
+            profile.cloudKitSyncEnabled = settings.healthKitEnabled
+            profile.unitsSystem = settings.unitsSystem
+            
+            try context.save()
+            
+            return profile
+        }
+    }
+    
+    func updateDailyGoal(_ goal: Double) async throws {
+        let context = coreDataStack.mainContext
+        
+        return try await context.perform {
+            let profile = UserProfile.getCurrent(in: context)
+            profile.dailyCO2Goal = goal
+            try context.save()
         }
     }
     
