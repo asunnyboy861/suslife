@@ -6,18 +6,45 @@
 //
 
 import Foundation
+import SwiftUI
+import UIKit
 
 @MainActor
 final class AchievementService: ObservableObject {
     @Published private(set) var achievements: [Achievement] = Achievement.allAchievements
     @Published private(set) var recentlyUnlocked: [Achievement] = []
     @Published private(set) var totalXP: Int = 0
+    @Published var showUnlockPopup = false
+    @Published var currentUnlockAchievement: Achievement?
     
     private let repository: ActivityRepositoryProtocol
+    private let achievementRepository: CoreDataAchievementRepository
+    private let notificationService: NotificationService
     
-    init(repository: ActivityRepositoryProtocol) {
+    init(
+        repository: ActivityRepositoryProtocol = CoreDataActivityRepository(),
+        achievementRepository: CoreDataAchievementRepository = CoreDataAchievementRepository(),
+        notificationService: NotificationService = .shared
+    ) {
         self.repository = repository
-        loadXP()
+        self.achievementRepository = achievementRepository
+        self.notificationService = notificationService
+        
+        Task {
+            await loadAchievements()
+        }
+    }
+    
+    private func loadAchievements() async {
+        do {
+            try await achievementRepository.migrateFromUserDefaults()
+            achievements = try await achievementRepository.fetchAll()
+            totalXP = try await achievementRepository.getTotalXP()
+        } catch {
+            print("Error loading achievements: \(error)")
+            achievements = Achievement.allAchievements
+            loadXP()
+        }
     }
     
     func checkAchievements() async {
@@ -45,6 +72,10 @@ final class AchievementService: ObservableObject {
                     unlockAchievement(at: index)
                     newlyUnlocked.append(achievements[index])
                     totalXP += achievements[index].xpReward
+                    
+                    try await achievementRepository.save(achievements[index])
+                    
+                    await handleAchievementUnlock(achievements[index])
                 } else {
                     updateProgress(
                         at: index,
@@ -53,12 +84,14 @@ final class AchievementService: ObservableObject {
                         streakDays: streak,
                         monthlyTrend: monthlyTrend
                     )
+                    
+                    try await achievementRepository.save(achievements[index])
                 }
             }
             
             if !newlyUnlocked.isEmpty {
                 recentlyUnlocked = newlyUnlocked
-                saveXP()
+                try? await achievementRepository.saveTotalXP(totalXP)
             }
         } catch {
             print("Error checking achievements: \(error)")
@@ -113,7 +146,7 @@ final class AchievementService: ObservableObject {
             progress = min(Double(calculateConsecutiveDays(monthlyTrend)) / Double(days), 1.0)
         }
         
-        achievement.progress = progress
+        achievements[index].progress = progress
     }
     
     private func weeklyActivitiesCount(_ trend: [DailyTotal]) -> Int {
@@ -154,6 +187,28 @@ final class AchievementService: ObservableObject {
     
     func clearRecentlyUnlocked() {
         recentlyUnlocked = []
+    }
+    
+    private func handleAchievementUnlock(_ achievement: Achievement) async {
+        currentUnlockAchievement = achievement
+        showUnlockPopup = true
+        
+        if notificationService.isAuthorized {
+            await notificationService.showAchievementUnlockedNotification(
+                title: "Achievement Unlocked!",
+                body: achievement.title,
+                iconName: achievement.iconName
+            )
+        }
+        
+        let impactGenerator = UIImpactFeedbackGenerator(style: .medium)
+        impactGenerator.impactOccurred()
+        
+        try? await Task.sleep(nanoseconds: 3_000_000_000)
+        await MainActor.run {
+            showUnlockPopup = false
+            currentUnlockAchievement = nil
+        }
     }
     
     private func loadXP() {

@@ -38,7 +38,7 @@ public class CarbonActivity: NSManagedObject {
         )
         
         // Track emission factor version
-        activity.emissionFactorVersion = EmissionFactorsVersion.current
+        activity.emissionFactorVersion = EmissionFactorsVersion.current()
         
         return activity
     }

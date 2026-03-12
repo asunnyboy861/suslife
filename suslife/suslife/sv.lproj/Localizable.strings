@@ -1,0 +1,149 @@
+/*
+  Localizable.strings
+  suslife
+  Swedish localization (Svenska)
+*/
+
+// App
+"app_name" = "Hållbart Liv";
+
+// Navigation
+"nav_home" = "Hem";
+"nav_community" = "Gemenskap";
+"nav_settings" = "Inställningar";
+
+// Dashboard
+"dashboard_title" = "Översikt";
+"dashboard_today" = "Idag";
+"dashboard_this_week" = "Denna vecka";
+"dashboard_carbon_footprint" = "Koldioxidavtryck";
+"dashboard_daily_goal" = "Dagligt mål";
+"dashboard_quick_log" = "Snabblogg";
+"dashboard_recent_activities" = "Senaste aktiviteter";
+"dashboard_tips" = "Tips";
+"dashboard_no_activities" = "Inga aktiviteter ännu. Börja logga för att spåra din påverkan!";
+
+// Categories
+"category_transport" = "Transport";
+"category_food" = "Mat";
+"category_shopping" = "Shopping";
+"category_energy" = "Energi";
+
+// Transport Activities
+"transport_walking" = "Gång";
+"transport_bicycle" = "Cykel";
+"transport_bus" = "Buss";
+"transport_train" = "Tåg";
+"transport_car" = "Bil";
+"transport_ev" = "Elbil";
+"transport_flight" = "Flyg";
+
+// Food Activities
+"food_vegan" = "Vegansk måltid";
+"food_vegetarian" = "Vegetarisk måltid";
+"food_chicken" = "Kyckling";
+"food_pork" = "Fläsk";
+"food_beef" = "Nötkött";
+"food_fish" = "Fisk";
+"food_dairy" = "Mejeri";
+
+// Shopping Activities
+"shopping_clothing" = "Kläder";
+"shopping_electronics" = "Elektronik";
+"shopping_furniture" = "Möbler";
+"shopping_books" = "Böcker";
+"shopping_household" = "Hushåll";
+
+// Energy Activities
+"energy_electricity" = "El";
+"energy_natural_gas" = "Naturgas";
+"energy_propane" = "Propan";
+"energy_solar" = "Solenergi";
+"energy_wind" = "Vindenergi";
+
+// Log Activity
+"log_title" = "Logga aktivitet";
+"log_category" = "Kategori";
+"log_activity_type" = "Aktivitetstyp";
+"log_value" = "Värde";
+"log_unit" = "Enhet";
+"log_date" = "Datum";
+"log_notes" = "Anteckningar (valfritt)";
+"log_save" = "Spara";
+"log_preview" = "CO₂ förhandsvisning";
+"log_success" = "Aktivitet sparad";
+
+// Units
+"unit_miles" = "engelska mil";
+"unit_km" = "km";
+"unit_lbs" = "pund";
+"unit_kg" = "kg";
+"unit_kwh" = "kWh";
+"unit_portion" = "portion";
+"unit_item" = "artikel";
+
+// Achievements
+"achievements_title" = "Prestationer";
+"achievements_unlocked" = "Prestation upplåst!";
+"achievements_total_xp" = "Total XP";
+"achievements_progress" = "Framsteg";
+
+// Community
+"community_title" = "Gemenskap";
+"community_ranking" = "Ranking";
+"community_weekly_challenge" = "Veckoutmaning";
+"community_tips" = "Gemenskapstips";
+
+// Settings
+"settings_title" = "Inställningar";
+"settings_region" = "Region";
+"settings_units" = "Enheter";
+"settings_notifications" = "Notiser";
+"settings_daily_reminder" = "Daglig påminnelse";
+"settings_reminder_time" = "Påminnelsetid";
+"settings_health_kit" = "Apple Health";
+"settings_connect_health" = "Anslut Apple Health";
+"settings_icloud_sync" = "iCloud-synk";
+"settings_export" = "Exportera data";
+"settings_about" = "Om";
+"settings_version" = "Version";
+"settings_privacy" = "Integritetspolicy";
+"settings_terms" = "Användarvillkor";
+
+// Region Settings
+"region_title" = "Regionsinställningar";
+"region_select" = "Välj region";
+"region_unit_system" = "Enhetssystem";
+"region_emission_factors" = "Utsläppsfaktorer";
+"region_data_source" = "Datakälla";
+"region_last_updated" = "Senast uppdaterad";
+"region_imperial" = "Imperial (mi, lbs)";
+"region_metric" = "Metrisk (km, kg)";
+
+// Onboarding
+"onboarding_welcome" = "Välkommen till Hållbart Liv";
+"onboarding_subtitle" = "Spåra ditt koldioxidavtryck och gör en positiv skillnad för planeten";
+"onboarding_feature_1" = "Spåra dagliga aktiviteter";
+"onboarding_feature_1_desc" = "Logga din transport, mat, shopping och energianvändning";
+"onboarding_feature_2" = "Tjäna prestationer";
+"onboarding_feature_2_desc" = "Lås upp prestationer och tjäna XP för hållbara val";
+"onboarding_feature_3" = "Gå med i gemenskapen";
+"onboarding_feature_3_desc" = "Jämför med andra och delta i veckoutmaningar";
+"onboarding_setup" = "Snabbinstallation";
+"onboarding_daily_goal" = "Dagligt CO₂-mål";
+"onboarding_enable_notifications" = "Aktivera notiser";
+"onboarding_enable_health" = "Anslut Apple Health";
+"onboarding_start" = "Kom igång";
+"onboarding_skip" = "Hoppa över";
+
+// Messages
+"msg_no_data" = "Inga data tillgängliga";
+"msg_loading" = "Laddar...";
+"msg_error" = "Ett fel uppstod";
+"msg_success" = "Klart";
+"msg_saved" = "Sparat";
+
+// CO2
+"co2_unit" = "CO₂";
+"co2_saved" = "CO₂ sparad";
+"co2_emitted" = "CO₂ utsläpp";

@@ -9,10 +9,21 @@ import SwiftUI
 
 @main
 struct suslifeApp: App {
+    @StateObject private var onboardingState = OnboardingState.shared
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, CoreDataStack.shared.persistentContainer.viewContext)
+            ZStack {
+                ContentView()
+                    .environment(\.managedObjectContext, CoreDataStack.shared.persistentContainer.viewContext)
+                
+                if !onboardingState.isCompleted {
+                    OnboardingView(isPresented: $onboardingState.isCompleted)
+                        .transition(.opacity)
+                        .zIndex(100)
+                }
+            }
+            .animation(.easeInOut, value: onboardingState.isCompleted)
         }
     }
 }

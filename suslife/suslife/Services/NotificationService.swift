@@ -11,6 +11,8 @@ import UIKit
 
 @MainActor
 final class NotificationService: ObservableObject {
+    static let shared = NotificationService()
+    
     @Published var isAuthorized = false
     @Published var authorizationStatus: UNAuthorizationStatus = .notDetermined
     
@@ -19,6 +21,7 @@ final class NotificationService: ObservableObject {
     init() {
         Task {
             await checkAuthorizationStatus()
+            registerNotificationCategories()
         }
     }
     
@@ -151,5 +154,69 @@ final class NotificationService: ObservableObject {
             return (hour, minute)
         }
         return nil
+    }
+    
+    func showAchievementUnlockedNotification(
+        title: String,
+        body: String,
+        iconName: String
+    ) async {
+        guard isAuthorized else { return }
+        
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        content.badge = 0
+        content.categoryIdentifier = "achievement_action"
+        
+        let request = UNNotificationRequest(
+            identifier: "achievement_\(UUID().uuidString)",
+            content: content,
+            trigger: nil
+        )
+        
+        do {
+            try await notificationCenter.add(request)
+        } catch {
+            print("Failed to show achievement notification: \(error)")
+        }
+    }
+    
+    private func cancelNotification(withIdentifier identifier: String) {
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier])
+    }
+    
+    func registerNotificationCategories() {
+        let viewAction = UNNotificationAction(
+            identifier: "VIEW_WEEKLY",
+            title: "View Summary",
+            options: .foreground
+        )
+        
+        let weeklyCategory = UNNotificationCategory(
+            identifier: "weekly_summary_action",
+            actions: [viewAction],
+            intentIdentifiers: [],
+            options: []
+        )
+        
+        let viewAchievementAction = UNNotificationAction(
+            identifier: "VIEW_ACHIEVEMENT",
+            title: "View Achievement",
+            options: .foreground
+        )
+        
+        let achievementCategory = UNNotificationCategory(
+            identifier: "achievement_action",
+            actions: [viewAchievementAction],
+            intentIdentifiers: [],
+            options: []
+        )
+        
+        notificationCenter.setNotificationCategories([
+            weeklyCategory,
+            achievementCategory
+        ])
     }
 }

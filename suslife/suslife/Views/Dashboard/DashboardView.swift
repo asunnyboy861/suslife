@@ -10,36 +10,50 @@ import SwiftUI
 struct DashboardView: View {
     @StateObject private var viewModel = DashboardViewModel()
     @StateObject private var recommendationService = RecommendationService()
+    @StateObject private var achievementService = AchievementService()
     @State private var showingLogSheet = false
     @State private var selectedCategory: String? = nil
     @State private var recommendations: [Recommendation] = []
+    @State private var activityObserver: NSObjectProtocol?
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    TodayFootprintCard(
-                        todayCO2: viewModel.todayCO2,
-                        changePercent: viewModel.changePercent,
-                        dailyGoal: viewModel.dailyGoal
-                    )
-                    
-                    WeeklyTrendChart(data: viewModel.weeklyData)
-                    
-                    QuickActionButtons { category in
-                        selectedCategory = category
-                        showingLogSheet = true
+            ZStack {
+                ScrollView {
+                    VStack(spacing: 20) {
+                        TodayFootprintCard(
+                            todayCO2: viewModel.todayCO2,
+                            changePercent: viewModel.changePercent,
+                            dailyGoal: viewModel.dailyGoal
+                        )
+                        
+                        WeeklyTrendChart(data: viewModel.weeklyData)
+                        
+                        QuickActionButtons { category in
+                            selectedCategory = category
+                            showingLogSheet = true
+                        }
+                        
+                        if !recommendations.isEmpty {
+                            RecommendationsCard(recommendations: recommendations)
+                        }
+                        
+                        RecentAchievementsCard(
+                            achievements: achievementService.recentlyUnlocked
+                        )
                     }
-                    
-                    if !recommendations.isEmpty {
-                        RecommendationsCard(recommendations: recommendations)
-                    }
-                    
-                    RecentAchievementsCard(
-                        achievements: viewModel.recentAchievements
-                    )
+                    .padding()
                 }
-                .padding()
+                
+                if achievementService.showUnlockPopup,
+                   let achievement = achievementService.currentUnlockAchievement {
+                    AchievementUnlockPopup(
+                        achievement: achievement,
+                        isPresented: $achievementService.showUnlockPopup
+                    )
+                    .transition(.opacity)
+                    .zIndex(100)
+                }
             }
             .navigationTitle("Sustainable Life")
             .toolbar {
@@ -52,11 +66,34 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showingLogSheet) {
                 if let category = selectedCategory {
-                    LogActivityView(category: category, viewModel: viewModel)
+                    LogActivityView(
+                        category: category,
+                        viewModel: viewModel,
+                        achievementService: achievementService
+                    )
                 }
             }
             .task {
                 await viewModel.loadData()
+                await achievementService.checkAchievements()
+                recommendations = (try? await recommendationService.getRecommendations()) ?? []
+            }
+            .onAppear {
+                setupActivityObserver()
+            }
+            .onDisappear {
+                if let observer = activityObserver {
+                    NotificationCenter.default.removeObserver(observer)
+                }
+            }
+        }
+    }
+    
+    private func setupActivityObserver() {
+        activityObserver = ActivityEvent.observeActivitySaved { co2Amount, category in
+            Task {
+                await viewModel.loadData()
+                await achievementService.checkAchievements()
                 recommendations = (try? await recommendationService.getRecommendations()) ?? []
             }
         }
@@ -186,7 +223,6 @@ struct WeeklyTrendChart: View {
             HStack(spacing: 8) {
                 ForEach(data) { item in
                     VStack(spacing: 4) {
-                        // Bar
                         ZStack(alignment: .bottom) {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(AppColors.divider)
@@ -198,12 +234,10 @@ struct WeeklyTrendChart: View {
                         }
                         .frame(maxWidth: .infinity)
                         
-                        // Day label
                         Text(dayLabel(for: item.date))
                             .font(Fonts.caption2)
                             .foregroundColor(AppColors.textSecondary)
                         
-                        // Value
                         Text(String(format: "%.0f", item.totalCO2))
                             .font(Fonts.caption2)
                             .fontWeight(.semibold)

@@ -37,8 +37,7 @@ class LogActivityViewModel: ObservableObject {
         value: Double,
         unit: String,
         notes: String?
-    ) async throws {
-        // Create input model
+    ) async throws -> Double {
         let input = ActivityInput(
             category: category,
             activityType: activityType,
@@ -48,7 +47,6 @@ class LogActivityViewModel: ObservableObject {
             date: Date()
         )
         
-        // Validate first
         let validation = input.validate()
         guard validation.isValid else {
             await MainActor.run {
@@ -58,12 +56,19 @@ class LogActivityViewModel: ObservableObject {
             throw ValidationError.invalidCategory(category)
         }
         
-        // Save if valid
         do {
-            _ = try await repository.save(input)
+            let activity = try await repository.save(input)
+            
+            ActivityEvent.notifyActivitySaved(
+                co2Amount: activity.co2Emission,
+                category: category
+            )
+            
             await MainActor.run {
                 showSuccess = true
             }
+            
+            return activity.co2Emission
         } catch {
             await MainActor.run {
                 errorMessage = error.localizedDescription

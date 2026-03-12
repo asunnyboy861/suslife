@@ -1,0 +1,149 @@
+/*
+  Localizable.strings
+  suslife
+  Spanish localization (Español)
+*/
+
+// App
+"app_name" = "Vida Sostenible";
+
+// Navigation
+"nav_home" = "Inicio";
+"nav_community" = "Comunidad";
+"nav_settings" = "Ajustes";
+
+// Dashboard
+"dashboard_title" = "Panel";
+"dashboard_today" = "Hoy";
+"dashboard_this_week" = "Esta semana";
+"dashboard_carbon_footprint" = "Huella de carbono";
+"dashboard_daily_goal" = "Objetivo diario";
+"dashboard_quick_log" = "Registro rápido";
+"dashboard_recent_activities" = "Actividades recientes";
+"dashboard_tips" = "Consejos";
+"dashboard_no_activities" = "Aún no hay actividades. ¡Comienza a registrar para seguir tu impacto!";
+
+// Categories
+"category_transport" = "Transporte";
+"category_food" = "Comida";
+"category_shopping" = "Compras";
+"category_energy" = "Energía";
+
+// Transport Activities
+"transport_walking" = "Caminar";
+"transport_bicycle" = "Bicicleta";
+"transport_bus" = "Autobús";
+"transport_train" = "Tren";
+"transport_car" = "Coche";
+"transport_ev" = "Coche eléctrico";
+"transport_flight" = "Vuelo";
+
+// Food Activities
+"food_vegan" = "Comida vegana";
+"food_vegetarian" = "Comida vegetariana";
+"food_chicken" = "Pollo";
+"food_pork" = "Cerdo";
+"food_beef" = "Ternera";
+"food_fish" = "Pescado";
+"food_dairy" = "Lácteos";
+
+// Shopping Activities
+"shopping_clothing" = "Ropa";
+"shopping_electronics" = "Electrónica";
+"shopping_furniture" = "Muebles";
+"shopping_books" = "Libros";
+"shopping_household" = "Hogar";
+
+// Energy Activities
+"energy_electricity" = "Electricidad";
+"energy_natural_gas" = "Gas natural";
+"energy_propane" = "Propano";
+"energy_solar" = "Solar";
+"energy_wind" = "Eólica";
+
+// Log Activity
+"log_title" = "Registrar actividad";
+"log_category" = "Categoría";
+"log_activity_type" = "Tipo de actividad";
+"log_value" = "Valor";
+"log_unit" = "Unidad";
+"log_date" = "Fecha";
+"log_notes" = "Notas (opcional)";
+"log_save" = "Guardar";
+"log_preview" = "Vista previa CO₂";
+"log_success" = "Actividad guardada";
+
+// Units
+"unit_miles" = "millas";
+"unit_km" = "km";
+"unit_lbs" = "libras";
+"unit_kg" = "kg";
+"unit_kwh" = "kWh";
+"unit_portion" = "porción";
+"unit_item" = "artículo";
+
+// Achievements
+"achievements_title" = "Logros";
+"achievements_unlocked" = "¡Logro desbloqueado!";
+"achievements_total_xp" = "XP total";
+"achievements_progress" = "Progreso";
+
+// Community
+"community_title" = "Comunidad";
+"community_ranking" = "Clasificación";
+"community_weekly_challenge" = "Desafío semanal";
+"community_tips" = "Consejos de la comunidad";
+
+// Settings
+"settings_title" = "Ajustes";
+"settings_region" = "Región";
+"settings_units" = "Unidades";
+"settings_notifications" = "Notificaciones";
+"settings_daily_reminder" = "Recordatorio diario";
+"settings_reminder_time" = "Hora del recordatorio";
+"settings_health_kit" = "Apple Health";
+"settings_connect_health" = "Conectar Apple Health";
+"settings_icloud_sync" = "Sincronización iCloud";
+"settings_export" = "Exportar datos";
+"settings_about" = "Acerca de";
+"settings_version" = "Versión";
+"settings_privacy" = "Política de privacidad";
+"settings_terms" = "Términos de servicio";
+
+// Region Settings
+"region_title" = "Configuración regional";
+"region_select" = "Seleccionar región";
+"region_unit_system" = "Sistema de unidades";
+"region_emission_factors" = "Factores de emisión";
+"region_data_source" = "Fuente de datos";
+"region_last_updated" = "Última actualización";
+"region_imperial" = "Imperial (mi, lbs)";
+"region_metric" = "Métrico (km, kg)";
+
+// Onboarding
+"onboarding_welcome" = "Bienvenido a Vida Sostenible";
+"onboarding_subtitle" = "Sigue tu huella de carbono y haz un impacto positivo en el planeta";
+"onboarding_feature_1" = "Seguir actividades diarias";
+"onboarding_feature_1_desc" = "Registra tu transporte, comida, compras y consumo de energía";
+"onboarding_feature_2" = "Ganar logros";
+"onboarding_feature_2_desc" = "Desbloquea logros y gana XP por elecciones sostenibles";
+"onboarding_feature_3" = "Unirse a la comunidad";
+"onboarding_feature_3_desc" = "Compárate con otros y participa en desafíos semanales";
+"onboarding_setup" = "Configuración rápida";
+"onboarding_daily_goal" = "Objetivo diario de CO₂";
+"onboarding_enable_notifications" = "Activar notificaciones";
+"onboarding_enable_health" = "Conectar Apple Health";
+"onboarding_start" = "Comenzar";
+"onboarding_skip" = "Omitir";
+
+// Messages
+"msg_no_data" = "No hay datos disponibles";
+"msg_loading" = "Cargando...";
+"msg_error" = "Ocurrió un error";
+"msg_success" = "Éxito";
+"msg_saved" = "Guardado";
+
+// CO2
+"co2_unit" = "CO₂";
+"co2_saved" = "CO₂ ahorrado";
+"co2_emitted" = "CO₂ emitido";

@@ -10,6 +10,7 @@ import SwiftUI
 struct LogActivityView: View {
     let category: String
     @ObservedObject var viewModel: DashboardViewModel
+    var achievementService: AchievementService?
     @Environment(\.dismiss) var dismiss
     @StateObject private var activityViewModel = LogActivityViewModel()
     
@@ -18,6 +19,7 @@ struct LogActivityView: View {
     @State private var notes: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var isSaving = false
     
     private var activityTypes: [String] {
         switch category {
@@ -58,7 +60,6 @@ struct LogActivityView: View {
     var body: some View {
         NavigationView {
             Form {
-                // Activity Type Section
                 Section(header: Text("Activity Type")) {
                     Picker("Select Activity", selection: $selectedType) {
                         Text("Select...").tag("")
@@ -68,7 +69,6 @@ struct LogActivityView: View {
                     }
                 }
                 
-                // Value Input Section
                 if !selectedType.isEmpty {
                     Section(header: Text("Value")) {
                         HStack {
@@ -80,7 +80,6 @@ struct LogActivityView: View {
                         }
                     }
                     
-                    // Estimated CO2
                     if inputValue.isEmpty == false, let _ = Double(inputValue) {
                         Section {
                             HStack {
@@ -93,7 +92,6 @@ struct LogActivityView: View {
                         }
                     }
                     
-                    // Notes Section
                     Section(header: Text("Notes (optional)")) {
                         TextField("e.g., Commute to work", text: $notes)
                     }
@@ -112,7 +110,7 @@ struct LogActivityView: View {
                     Button("Save") {
                         saveActivity()
                     }
-                    .disabled(selectedType.isEmpty || inputValue.isEmpty)
+                    .disabled(selectedType.isEmpty || inputValue.isEmpty || isSaving)
                 }
             }
             .alert("Error", isPresented: $showError) {
@@ -130,9 +128,11 @@ struct LogActivityView: View {
             return
         }
         
+        isSaving = true
+        
         Task {
             do {
-                try await activityViewModel.saveActivity(
+                _ = try await activityViewModel.saveActivity(
                     category: category,
                     activityType: selectedType,
                     value: value,
@@ -141,10 +141,12 @@ struct LogActivityView: View {
                 )
                 
                 await MainActor.run {
+                    isSaving = false
                     dismiss()
                 }
             } catch {
                 await MainActor.run {
+                    isSaving = false
                     errorMessage = error.localizedDescription
                     showError = true
                 }

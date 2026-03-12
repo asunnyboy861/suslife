@@ -8,32 +8,30 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("cloudKitSyncEnabled") private var cloudKitSyncEnabled = false
     @AppStorage("unitsSystem") private var unitsSystem = "imperial"
     @AppStorage("dailyReminderEnabled") private var dailyReminderEnabled = false
     @AppStorage("reminderHour") private var reminderHour = 9
     @AppStorage("reminderMinute") private var reminderMinute = 0
     @AppStorage("healthKitEnabled") private var healthKitEnabled = false
     
-    @StateObject private var notificationService = NotificationService()
+    @StateObject private var notificationService = NotificationService.shared
     @StateObject private var healthKitService = HealthKitService()
+    @StateObject private var cloudKitService = CloudKitSyncService.shared
     @State private var showingReminderPicker = false
     @State private var showingExportSheet = false
     
     var body: some View {
         NavigationView {
             Form {
+                regionSection
+                
                 notificationSection
                 
                 healthKitSection
                 
+                cloudKitSection
+                
                 dataSection
-                
-                privacySection
-                
-                unitsSection
-                
-                exportSection
                 
                 aboutSection
                 
@@ -42,6 +40,9 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .sheet(isPresented: $showingExportSheet) {
                 ExportView()
+            }
+            .task {
+                await cloudKitService.checkAccountStatus()
             }
         }
     }
@@ -132,6 +133,44 @@ struct SettingsView: View {
         }
     }
     
+    private var cloudKitSection: some View {
+        Section(header: Text("iCloud Sync")) {
+            Toggle("Enable iCloud Sync", isOn: Binding(
+                get: { cloudKitService.isSyncEnabled },
+                set: { newValue in
+                    Task {
+                        if newValue {
+                            _ = await cloudKitService.enableSync()
+                        } else {
+                            cloudKitService.disableSync()
+                        }
+                    }
+                }
+            ))
+            
+            HStack {
+                Text("Status")
+                Spacer()
+                Text(cloudKitService.getSyncStatusDescription())
+                    .foregroundColor(cloudKitService.syncStatus == .synced ? .green : .secondary)
+                    .font(.caption)
+            }
+            
+            if cloudKitService.isSyncEnabled {
+                Button("Sync Now") {
+                    Task {
+                        await cloudKitService.syncNow()
+                    }
+                }
+                .disabled(cloudKitService.syncStatus == .syncing)
+            }
+            
+            Text("When enabled, your activity data syncs to iCloud for backup and sharing across devices.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+    
     private var dataSection: some View {
         Section(header: Text("Data")) {
             Button(action: { showingExportSheet = true }) {
@@ -143,34 +182,20 @@ struct SettingsView: View {
         }
     }
     
-    private var privacySection: some View {
-        Section(header: Text("Privacy & Data")) {
-            Toggle("Enable iCloud Sync", isOn: $cloudKitSyncEnabled)
-            
-            Text("When enabled, your data syncs to your iCloud account for backup.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-    }
-    
-    private var unitsSection: some View {
-        Section(header: Text("Units")) {
-            Picker("Units System", selection: $unitsSystem) {
-                Text("Imperial (mi, lbs)").tag("imperial")
-                Text("Metric (km, kg)").tag("metric")
-            }
-        }
-    }
-    
-    private var exportSection: some View {
-        Section(header: Text("Export")) {
-            Button(action: { showingExportSheet = true }) {
+    private var regionSection: some View {
+        Section(header: Text("Region & Units")) {
+            NavigationLink(destination: RegionSettingsView()) {
                 HStack {
-                    Image(systemName: "square.and.arrow.up")
-                    Text("Export Activity Data")
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.secondary)
+                    Text(RegionManager.shared.currentRegion.flagEmoji)
+                        .font(.title2)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Region")
+                            .foregroundColor(.primary)
+                        Text("\(RegionManager.shared.currentRegion.displayName) • \(RegionManager.shared.unitSystem == .imperial ? "Imperial" : "Metric")")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
         }
@@ -186,10 +211,11 @@ struct SettingsView: View {
             }
             
             HStack {
-                Text("Emission Factors Version")
+                Text("Emission Factors")
                 Spacer()
-                Text(EmissionFactorsVersion.current)
+                Text(RegionManager.shared.currentRegion.emissionFactors.source)
                     .foregroundColor(.secondary)
+                    .font(.caption)
             }
         }
     }

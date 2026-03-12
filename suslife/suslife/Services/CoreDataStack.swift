@@ -2,11 +2,12 @@
 //  CoreDataStack.swift
 //  suslife
 //
-//  CoreData Stack - Manages CoreData stack with async/await support
+//  CoreData Stack - Manages CoreData stack with async/await support and CloudKit sync
 //
 
 import Foundation
 import CoreData
+import CloudKit
 
 final class CoreDataStack {
     
@@ -17,7 +18,6 @@ final class CoreDataStack {
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "suslife")
         
-        // Enable history tracking for CloudKit sync (future)
         guard let description = container.persistentStoreDescriptions.first else {
             fatalError("No store descriptions")
         }
@@ -25,13 +25,46 @@ final class CoreDataStack {
         description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         
+        if UserDefaults.standard.bool(forKey: "cloudKitSyncEnabled") {
+            description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
+                containerIdentifier: "iCloud.com.zzoutuo.suslife"
+            )
+        }
+        
         container.loadPersistentStores { description, error in
             if let error = error {
                 fatalError("CoreData loading failed: \(error.localizedDescription)")
             }
         }
         
-        // Enable automatic merging
+        container.viewContext.automaticallyMergesChangesFromParent = true
+        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        
+        return container
+    }()
+    
+    lazy var cloudKitContainer: NSPersistentCloudKitContainer? = {
+        guard UserDefaults.standard.bool(forKey: "cloudKitSyncEnabled") else { return nil }
+        
+        let container = NSPersistentCloudKitContainer(name: "suslife")
+        
+        guard let description = container.persistentStoreDescriptions.first else {
+            fatalError("No store descriptions")
+        }
+        
+        description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+        description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        
+        description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
+            containerIdentifier: "iCloud.com.zzoutuo.suslife"
+        )
+        
+        container.loadPersistentStores { description, error in
+            if let error = error {
+                print("CloudKit container loading failed: \(error.localizedDescription)")
+            }
+        }
+        
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         
@@ -40,12 +73,10 @@ final class CoreDataStack {
     
     // MARK: - Contexts
     
-    /// Main context for UI operations
     var mainContext: NSManagedObjectContext {
         persistentContainer.viewContext
     }
     
-    /// Create a new background context for heavy operations
     func newBackgroundContext() -> NSManagedObjectContext {
         let context = persistentContainer.newBackgroundContext()
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
@@ -55,7 +86,6 @@ final class CoreDataStack {
     
     // MARK: - Save
     
-    /// Save main context if there are changes
     func save() throws {
         let context = mainContext
         if context.hasChanges {
@@ -63,7 +93,6 @@ final class CoreDataStack {
         }
     }
     
-    /// Save with error recovery
     func saveWithRetry(maxAttempts: Int = 3) throws {
         var lastError: Error?
         
@@ -87,7 +116,6 @@ final class CoreDataStack {
     
     // MARK: - Testing Support
     
-    /// Create in-memory stack for unit tests
     static func createInMemoryStack() -> CoreDataStack {
         let stack = CoreDataStack()
         

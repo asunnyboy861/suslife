@@ -16,20 +16,9 @@ final class Achievement: Identifiable, Codable {
     let requirement: AchievementRequirement
     let xpReward: Int
     
-    var isUnlocked: Bool {
-        get { UserDefaults.standard.bool(forKey: "achievement_\(id)_unlocked") }
-        set { UserDefaults.standard.set(newValue, forKey: "achievement_\(id)_unlocked") }
-    }
-    
-    var progress: Double {
-        get { UserDefaults.standard.double(forKey: "achievement_\(id)_progress") }
-        set { UserDefaults.standard.set(newValue, forKey: "achievement_\(id)_progress") }
-    }
-    
-    var unlockedDate: Date? {
-        get { UserDefaults.standard.object(forKey: "achievement_\(id)_date") as? Date }
-        set { UserDefaults.standard.set(newValue, forKey: "achievement_\(id)_date") }
-    }
+    var isUnlocked: Bool = false
+    var progress: Double = 0.0
+    var unlockedDate: Date? = nil
     
     init(
         id: String,
@@ -47,6 +36,30 @@ final class Achievement: Identifiable, Codable {
         self.category = category
         self.requirement = requirement
         self.xpReward = xpReward
+    }
+    
+    init(
+        id: String,
+        title: String,
+        description: String,
+        iconName: String,
+        category: AchievementCategory,
+        requirement: AchievementRequirement,
+        xpReward: Int,
+        isUnlocked: Bool,
+        progress: Double,
+        unlockedDate: Date?
+    ) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.iconName = iconName
+        self.category = category
+        self.requirement = requirement
+        self.xpReward = xpReward
+        self.isUnlocked = isUnlocked
+        self.progress = progress
+        self.unlockedDate = unlockedDate
     }
 }
 
