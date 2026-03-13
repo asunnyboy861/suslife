@@ -239,8 +239,8 @@ struct SettingsView: View {
     
     private var legalSection: some View {
         Section(header: Text("Legal")) {
-            Link("Privacy Policy", destination: URL(string: "https://yourwebsite.com/privacy")!)
-            Link("Terms of Service", destination: URL(string: "https://yourwebsite.com/terms")!)
+            Link("Privacy Policy", destination: URL(string: "https://suslife-privacy.zzoutuo.com")!)
+            Link("Support & Terms", destination: URL(string: "https://suslife-support.zzoutuo.com")!)
         }
     }
 }
