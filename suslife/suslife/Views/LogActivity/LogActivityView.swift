@@ -21,28 +21,36 @@ struct LogActivityView: View {
     @State private var errorMessage = ""
     @State private var isSaving = false
     
-    private var activityTypes: [String] {
+    // Pre-computed activity types for faster rendering
+    private let activityTypes: [String]
+    private let unit: String
+    
+    init(
+        category: String,
+        viewModel: DashboardViewModel,
+        achievementService: AchievementService? = nil
+    ) {
+        self.category = category
+        self.viewModel = viewModel
+        self.achievementService = achievementService
+        
+        // Pre-compute activity types and unit in initializer for instant rendering
         switch category {
         case "transport":
-            return ["car", "bus", "train", "flight", "ev", "walking", "bicycle"]
+            self.activityTypes = ["car", "bus", "train", "flight", "ev", "walking", "bicycle"]
+            self.unit = "mi"
         case "food":
-            return ["beef", "chicken", "pork", "fish", "vegetarian", "vegan", "dairy"]
+            self.activityTypes = ["beef", "chicken", "pork", "fish", "vegetarian", "vegan", "dairy"]
+            self.unit = "portion"
         case "shopping":
-            return ["clothing", "electronics", "furniture", "books", "household"]
+            self.activityTypes = ["clothing", "electronics", "furniture", "books", "household"]
+            self.unit = "item"
         case "energy":
-            return ["electricity", "naturalGas", "propane", "solar", "wind"]
+            self.activityTypes = ["electricity", "naturalGas", "propane", "solar", "wind"]
+            self.unit = "kWh"
         default:
-            return []
-        }
-    }
-    
-    private var unit: String {
-        switch category {
-        case "transport": return "mi"
-        case "food": return "portion"
-        case "shopping": return "item"
-        case "energy": return "kWh"
-        default: return ""
+            self.activityTypes = []
+            self.unit = ""
         }
     }
     

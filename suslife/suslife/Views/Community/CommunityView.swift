@@ -63,10 +63,11 @@ struct CommunityView: View {
             HStack {
                 Image(systemName: "gamecontroller.fill")
                     .foregroundColor(AppColors.textSecondary)
-                Text("Challenge Mode - Beat the AI!")
+                Text("🎮 Challenge Mode - Beat the AI!")
                     .font(Fonts.footnote)
                     .foregroundColor(AppColors.textSecondary)
             }
+            .padding(.horizontal)
         }
         .padding(.top)
     }
@@ -81,6 +82,31 @@ struct CommunityView: View {
                 .tag(1)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
+        
+        // Add explanation card
+        challengeExplanationCard
+    }
+    
+    private var challengeExplanationCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "info.circle.fill")
+                    .foregroundColor(AppColors.primary)
+                Text("How It Works")
+                    .font(Fonts.headline)
+                    .foregroundColor(AppColors.textPrimary)
+            }
+            
+            Text("Challenge against AI-generated opponents to track your progress! Your real data is compared with AI benchmarks to show how you're doing.")
+                .font(Fonts.footnote)
+                .foregroundColor(AppColors.textSecondary)
+                .lineLimit(3)
+        }
+        .padding(12)
+        .background(AppColors.cardBackground)
+        .cornerRadius(8)
+        .padding(.horizontal)
+        .padding(.top, 12)
     }
     
     private func loadLeaderboard() async {
@@ -100,7 +126,7 @@ struct AllTimeLeaderboardView: View {
                 }
             }
             
-            Section(header: Text("Top Community Members")) {
+            Section(header: Text(" AI Opponents")) {
                 ForEach(entries.filter { $0.id != "current_user" }) { entry in
                     LeaderboardRow(entry: entry, isCurrentUser: false)
                 }
@@ -124,7 +150,7 @@ struct WeeklyLeaderboardView: View {
                 }
             }
             
-            Section(header: Text("This Week's Top")) {
+            Section(header: Text(" Weekly AI Opponents")) {
                 ForEach(entries.filter { $0.id != "current_user" }) { entry in
                     LeaderboardRow(entry: entry, isCurrentUser: false)
                 }
