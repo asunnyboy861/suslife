@@ -10,31 +10,77 @@ import SwiftUI
 struct CommunityView: View {
     @StateObject private var rankingService = RankingService()
     @State private var selectedTab = 0
+    @State private var showingPersonalProgress = false
     
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                Picker("Leaderboard", selection: $selectedTab) {
-                    Text("All Time").tag(0)
-                    Text("This Week").tag(1)
-                }
-                .pickerStyle(.segmented)
-                .padding()
+                // 1. My Progress entry point
+                myProgressButton
                 
-                TabView(selection: $selectedTab) {
-                    AllTimeLeaderboardView(rankingService: rankingService)
-                        .tag(0)
-                    
-                    WeeklyLeaderboardView(rankingService: rankingService)
-                        .tag(1)
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
+                // 2. Challenge mode picker
+                challengeModePicker
+                
+                // 3. Challenge mode content
+                challengeModeContent
             }
             .navigationTitle("Community")
-            .task {
-                await loadLeaderboard()
+            .sheet(isPresented: $showingPersonalProgress) {
+                PersonalLeaderboardView()
             }
         }
+    }
+    
+    // MARK: - Subviews
+    
+    private var myProgressButton: some View {
+        Button(action: { showingPersonalProgress = true }) {
+            HStack {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .font(.system(size: 20))
+                Text("My Progress")
+                    .font(Fonts.headline)
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(AppColors.primary)
+            .cornerRadius(12)
+        }
+        .padding(.horizontal)
+        .padding(.top)
+    }
+    
+    private var challengeModePicker: some View {
+        VStack(spacing: 8) {
+            Picker("Leaderboard", selection: $selectedTab) {
+                Text("All Time").tag(0)
+                Text("This Week").tag(1)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            
+            HStack {
+                Image(systemName: "gamecontroller.fill")
+                    .foregroundColor(AppColors.textSecondary)
+                Text("Challenge Mode - Beat the AI!")
+                    .font(Fonts.footnote)
+                    .foregroundColor(AppColors.textSecondary)
+            }
+        }
+        .padding(.top)
+    }
+    
+    @ViewBuilder
+    private var challengeModeContent: some View {
+        TabView(selection: $selectedTab) {
+            AllTimeLeaderboardView(rankingService: rankingService)
+                .tag(0)
+            
+            WeeklyLeaderboardView(rankingService: rankingService)
+                .tag(1)
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
     }
     
     private func loadLeaderboard() async {

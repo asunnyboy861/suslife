@@ -191,5 +191,5 @@ extension Achievement {
             requirement: .consecutiveDays(days: 5),
             xpReward: 50
         )
-    ]
+    ] + personalMilestones  // Add personal milestone achievements
 }
