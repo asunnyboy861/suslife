@@ -14,15 +14,15 @@ public extension CarbonActivity {
         NSFetchRequest<CarbonActivity>(entityName: "CarbonActivity")
     }
     
-    @NSManaged public var id: UUID
-    @NSManaged public var category: String
-    @NSManaged public var activityType: String
-    @NSManaged public var value: Double
-    @NSManaged public var unit: String
-    @NSManaged public var co2Emission: Double
-    @NSManaged public var date: Date
-    @NSManaged public var notes: String?
-    @NSManaged public var emissionFactorVersion: String
+    @NSManaged var id: UUID
+    @NSManaged var category: String
+    @NSManaged var activityType: String
+    @NSManaged var value: Double
+    @NSManaged var unit: String
+    @NSManaged var co2Emission: Double
+    @NSManaged var date: Date
+    @NSManaged var notes: String?
+    @NSManaged var emissionFactorVersion: String
 }
 
 // MARK: - Identifiable

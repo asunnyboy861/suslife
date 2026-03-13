@@ -29,10 +29,10 @@ final class ExportService: ObservableObject {
         for activity in activities {
             let row = [
                 dateFormatter.string(from: activity.date),
-                activity.category ?? "",
-                activity.activityType ?? "",
+                activity.category,
+                activity.activityType,
                 String(format: "%.2f", activity.value),
-                activity.unit ?? "",
+                activity.unit,
                 String(format: "%.2f", activity.co2Emission),
                 activity.notes ?? ""
             ].joined(separator: ",")
@@ -55,10 +55,10 @@ final class ExportService: ObservableObject {
             var dict: [String: Any] = [
                 "id": activity.id.uuidString,
                 "date": ISO8601DateFormatter().string(from: activity.date),
-                "category": activity.category ?? "",
-                "activityType": activity.activityType ?? "",
+                "category": activity.category,
+                "activityType": activity.activityType,
                 "value": activity.value,
-                "unit": activity.unit ?? "",
+                "unit": activity.unit,
                 "co2Emission": activity.co2Emission
             ]
             
@@ -88,7 +88,7 @@ final class ExportService: ObservableObject {
         
         let weeklyTotal = weeklyTrend.reduce(0.0) { $0 + $1.totalCO2 }
         
-        var shareText = """
+        let shareText = """
         🌱 My Sustainability Journey with SusLife
         
         📊 Total CO2 Saved: \(String(format: "%.1f", totalCO2Saved)) lbs

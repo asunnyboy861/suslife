@@ -24,11 +24,11 @@ final class AchievementService: ObservableObject {
     init(
         repository: ActivityRepositoryProtocol = CoreDataActivityRepository(),
         achievementRepository: CoreDataAchievementRepository = CoreDataAchievementRepository(),
-        notificationService: NotificationService = .shared
+        notificationService: NotificationService? = nil
     ) {
         self.repository = repository
         self.achievementRepository = achievementRepository
-        self.notificationService = notificationService
+        self.notificationService = notificationService ?? NotificationService.shared
         
         Task {
             await loadAchievements()

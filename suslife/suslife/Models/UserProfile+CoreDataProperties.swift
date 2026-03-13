@@ -14,13 +14,13 @@ public extension UserProfile {
         NSFetchRequest<UserProfile>(entityName: "UserProfile")
     }
     
-    @NSManaged public var id: UUID
-    @NSManaged public var dailyCO2Goal: Double
-    @NSManaged public var weeklyStreak: Int32
-    @NSManaged public var totalActivitiesLogged: Int32
-    @NSManaged public var joinDate: Date
-    @NSManaged public var cloudKitSyncEnabled: Bool
-    @NSManaged public var unitsSystem: String
+    @NSManaged var id: UUID
+    @NSManaged var dailyCO2Goal: Double
+    @NSManaged var weeklyStreak: Int32
+    @NSManaged var totalActivitiesLogged: Int32
+    @NSManaged var joinDate: Date
+    @NSManaged var cloudKitSyncEnabled: Bool
+    @NSManaged var unitsSystem: String
 }
 
 // MARK: - Identifiable

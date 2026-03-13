@@ -47,7 +47,7 @@ final class RecommendationService: ObservableObject {
     
     func getRecommendations() async throws -> [Recommendation] {
         let activities = try await repository.fetchActivities(from: .distantPast, to: Date())
-        let categoryCount = Dictionary(grouping: activities, by: { $0.category ?? "Unknown" })
+        let categoryCount = Dictionary(grouping: activities, by: { $0.category })
         
         var recommendations: [Recommendation] = []
         

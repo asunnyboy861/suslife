@@ -32,18 +32,29 @@ final class LocalUserRepository: UserRepositoryProtocol {
     }
     
     func createUserProfile(settings: UserProfileSettings) async throws -> UserProfile {
+        print("💾 [LocalUserRepository] createUserProfile called")
         let context = coreDataStack.mainContext
+        print("💾 [LocalUserRepository] Got main context")
         
         return try await context.perform {
+            print("💾 [LocalUserRepository] Inside context.perform")
+            
             // Use getCurrent to ensure singleton pattern
+            print("💾 [LocalUserRepository] Calling UserProfile.getCurrent...")
             let profile = UserProfile.getCurrent(in: context)
+            print("💾 [LocalUserRepository] Got profile, id: \(profile.id)")
+            print("💾 [LocalUserRepository] Profile exists: \(profile.objectID.isTemporaryID)")
             
             // Update profile with new settings
+            print("💾 [LocalUserRepository] Updating profile settings...")
             profile.dailyCO2Goal = settings.dailyCO2Goal
             profile.cloudKitSyncEnabled = settings.healthKitEnabled
             profile.unitsSystem = settings.unitsSystem
+            print("💾 [LocalUserRepository] Profile updated")
             
+            print("💾 [LocalUserRepository] Saving context...")
             try context.save()
+            print("💾 [LocalUserRepository] Context saved successfully")
             
             return profile
         }
@@ -62,7 +73,7 @@ final class LocalUserRepository: UserRepositoryProtocol {
     func updateStreak(_ streak: Int32) async throws {
         let context = coreDataStack.mainContext
         
-        return try await context.perform {
+        await context.perform {
             let profile = UserProfile.getCurrent(in: context)
             profile.weeklyStreak = streak
             try? context.save()
@@ -72,7 +83,7 @@ final class LocalUserRepository: UserRepositoryProtocol {
     func incrementActivityCount() async throws {
         let context = coreDataStack.mainContext
         
-        return try await context.perform {
+        await context.perform {
             let profile = UserProfile.getCurrent(in: context)
             profile.totalActivitiesLogged += 1
             try? context.save()

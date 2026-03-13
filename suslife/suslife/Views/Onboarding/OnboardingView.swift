@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @Binding var isPresented: Bool
+    let onComplete: () -> Void
     @State private var currentPage = 0
     @State private var dailyGoal: Double = 20.0
     @State private var notificationsEnabled = false
@@ -189,9 +189,10 @@ struct OnboardingView: View {
         .padding(.bottom, 40)
     }
     
-    @ViewBuilder
     private func setupView() -> some View {
-        VStack(spacing: 24) {
+        let _ = print(" [DEBUG] setupView rendering, currentPage = \(currentPage), pages.count = \(pages.count)")
+        
+        return VStack(spacing: 24) {
             Spacer()
             
             Text("Quick Setup")
@@ -218,7 +219,10 @@ struct OnboardingView: View {
     
     // Start Tracking button with loading state
     private var startTrackingButton: some View {
-        Button(action: handleCompleteOnboarding) {
+        Button(action: {
+            print("🔴 [DEBUG] Button action triggered!")
+            handleCompleteOnboarding()
+        }) {
             HStack {
                 if isProcessing {
                     ProgressView()
@@ -237,6 +241,10 @@ struct OnboardingView: View {
             .cornerRadius(12)
         }
         .disabled(isProcessing)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            print(" [DEBUG] Button tapped!")
+        }
         .padding(.horizontal, 24)
         .padding(.bottom, 40)
     }
@@ -311,49 +319,74 @@ struct OnboardingView: View {
     }
     
     private func handleCompleteOnboarding() {
-        Task {
+        print("🚀 [Onboarding] Start Tracking button clicked")
+        
+        Task { @MainActor in
+            print("📱 [Onboarding] Setting isProcessing = true")
             isProcessing = true
             
             do {
-                // 1. Request notification permissions (non-blocking)
+                print("🔔 [Onboarding] Step 1: Checking notification permissions (enabled: \(notificationsEnabled))")
                 if notificationsEnabled {
                     let service = NotificationService.shared
+                    print("🔔 [Onboarding] Requesting notification authorization...")
                     let authorized = await service.requestAuthorization()
+                    print("🔔 [Onboarding] Notification authorized: \(authorized)")
                     if authorized {
+                        print("🔔 [Onboarding] Scheduling daily reminder...")
                         await service.scheduleDailyReminder(at: 20, minute: 0)
+                        print("🔔 [Onboarding] Daily reminder scheduled")
                     }
+                } else {
+                    print("🔔 [Onboarding] Notifications disabled, skipping")
                 }
                 
-                // 2. Request HealthKit permissions (non-blocking)
+                print("❤️ [Onboarding] Step 2: Checking HealthKit permissions (enabled: \(healthKitEnabled))")
                 if healthKitEnabled {
                     let healthService = HealthKitService()
-                    _ = await healthService.requestAuthorization()
+                    print("❤️ [Onboarding] Requesting HealthKit authorization...")
+                    let healthAuthorized = await healthService.requestAuthorization()
+                    print("❤️ [Onboarding] HealthKit authorized: \(healthAuthorized)")
+                } else {
+                    print("❤️ [Onboarding] HealthKit disabled, skipping")
                 }
                 
-                // 3. Save user profile using repository (critical)
+                print("💾 [Onboarding] Step 3: Saving user profile...")
                 try await saveUserProfileWithRepository()
+                print("💾 [Onboarding] User profile saved successfully")
                 
-                // 4. Update onboarding state
+                print("✅ [Onboarding] Step 4: Updating onboarding state")
                 OnboardingState.shared.completeOnboarding(dailyGoal: dailyGoal)
+                print("✅ [Onboarding] Onboarding completed, dailyGoal: \(dailyGoal)")
                 
+                print("📱 [Onboarding] Setting isProcessing = false")
                 isProcessing = false
                 
-                // 5. Close onboarding with animation
-                withAnimation {
-                    isPresented = false
-                }
+                print("👋 [Onboarding] Step 5: Closing onboarding view")
+                onComplete()
+                print("👋 [Onboarding] Onboarding view dismissed")
                 
             } catch {
+                print("❌ [Onboarding] ERROR occurred: \(error.localizedDescription)")
                 isProcessing = false
                 errorMessage = error.localizedDescription
                 showErrorAlert = true
+                print("❌ [Onboarding] Error alert shown to user")
             }
         }
     }
     
     // Save user profile using repository instead of direct CoreData access
     private func saveUserProfileWithRepository() async throws {
+        print("💾 [Onboarding] saveUserProfileWithRepository called")
+        print("💾 [Onboarding] Creating LocalUserRepository...")
         let repository = LocalUserRepository()
+        
+        print("💾 [Onboarding] Creating UserProfileSettings...")
+        print("💾 [Onboarding]   - dailyCO2Goal: \(dailyGoal)")
+        print("💾 [Onboarding]   - notificationsEnabled: \(notificationsEnabled)")
+        print("💾 [Onboarding]   - healthKitEnabled: \(healthKitEnabled)")
+        print("💾 [Onboarding]   - unitsSystem: imperial")
         
         let settings = UserProfileSettings(
             dailyCO2Goal: dailyGoal,
@@ -362,50 +395,12 @@ struct OnboardingView: View {
             unitsSystem: "imperial"
         )
         
-        _ = try await repository.createUserProfile(settings: settings)
+        print("💾 [Onboarding] Calling repository.createUserProfile...")
+        let profile = try await repository.createUserProfile(settings: settings)
+        print("💾 [Onboarding] Profile created/updated successfully, id: \(profile.id)")
     }
     
-    // Old function kept for reference (will be removed later)
-    private func completeOnboarding() {
-        Task {
-            if notificationsEnabled {
-                let service = NotificationService.shared
-                _ = await service.requestAuthorization()
-                if service.isAuthorized {
-                    await service.scheduleDailyReminder(at: 20, minute: 0)
-                }
-            }
-            
-            if healthKitEnabled {
-                let healthService = HealthKitService()
-                _ = await healthService.requestAuthorization()
-            }
-            
-            await saveUserProfile()
-            
-            await MainActor.run {
-                OnboardingState.shared.completeOnboarding(dailyGoal: dailyGoal)
-                isPresented = false
-            }
-        }
-    }
-    
-    // Old function kept for reference (will be removed later)
-    private func saveUserProfile() async {
-        let context = CoreDataStack.shared.mainContext
-        await context.perform {
-            let profile = UserProfile(context: context)
-            profile.id = UUID()
-            profile.joinDate = Date()
-            profile.dailyCO2Goal = self.dailyGoal
-            profile.weeklyStreak = 0
-            profile.totalActivitiesLogged = 0
-            profile.cloudKitSyncEnabled = false
-            profile.unitsSystem = "imperial"
-            
-            try? context.save()
-        }
-    }
+
 }
 
 struct OnboardingPage {
@@ -417,6 +412,6 @@ struct OnboardingPage {
 
 struct OnboardingView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingView(isPresented: .constant(true))
+        OnboardingView(onComplete: {})
     }
 }

@@ -18,9 +18,13 @@ struct suslifeApp: App {
                     .environment(\.managedObjectContext, CoreDataStack.shared.persistentContainer.viewContext)
                 
                 if !onboardingState.isCompleted {
-                    OnboardingView(isPresented: $onboardingState.isCompleted)
-                        .transition(.opacity)
-                        .zIndex(100)
+                    OnboardingView(onComplete: {
+                        withAnimation {
+                            onboardingState.isCompleted = true
+                        }
+                    })
+                    .transition(.opacity)
+                    .zIndex(100)
                 }
             }
             .animation(.easeInOut, value: onboardingState.isCompleted)
