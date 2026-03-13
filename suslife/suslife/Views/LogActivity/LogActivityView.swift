@@ -10,9 +10,9 @@ import SwiftUI
 struct LogActivityView: View {
     let category: String
     @ObservedObject var viewModel: DashboardViewModel
-    var achievementService: AchievementService?
+    let achievementService: AchievementService
     @Environment(\.dismiss) var dismiss
-    @StateObject private var activityViewModel = LogActivityViewModel()
+    @StateObject private var activityViewModel: LogActivityViewModel
     
     @State private var selectedType: String = ""
     @State private var inputValue: String = ""
@@ -28,7 +28,7 @@ struct LogActivityView: View {
     init(
         category: String,
         viewModel: DashboardViewModel,
-        achievementService: AchievementService? = nil
+        achievementService: AchievementService
     ) {
         self.category = category
         self.viewModel = viewModel
@@ -52,6 +52,11 @@ struct LogActivityView: View {
             self.activityTypes = []
             self.unit = ""
         }
+        
+        // Initialize ViewModel with injected dependencies (non-blocking)
+        _activityViewModel = StateObject(
+            wrappedValue: LogActivityViewModel(achievementService: achievementService)
+        )
     }
     
     private var estimatedCO2: Double {
@@ -148,6 +153,13 @@ struct LogActivityView: View {
                     notes: notes.isEmpty ? nil : notes
                 )
                 
+                // Check for newly unlocked achievements
+                // Wait a moment for achievements to be checked
+                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                
+                // Note: Achievement popup is handled by DashboardView's observer
+                // This ensures consistent achievement display across the app
+                
                 await MainActor.run {
                     isSaving = false
                     dismiss()
@@ -169,7 +181,8 @@ struct LogActivityView_Previews: PreviewProvider {
     static var previews: some View {
         LogActivityView(
             category: "transport",
-            viewModel: DashboardViewModel()
+            viewModel: DashboardViewModel(),
+            achievementService: AchievementService()
         )
     }
 }

@@ -183,4 +183,125 @@ final class CoreDataActivityRepositoryTests: XCTestCase {
         let total = try await repository.calculateTotalCO2Saved()
         XCTAssertGreaterThanOrEqual(total, 0)
     }
+    
+    // MARK: - Streak Calculation Tests
+    
+    func testCalculateCurrentStreak_WithConsecutiveDays() async throws {
+        // Given: 连续 3 天有活动
+        let calendar = Calendar.current
+        for dayOffset in 0..<3 {
+            guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else {
+                XCTFail("Failed to create date")
+                return
+            }
+            
+            let input = ActivityInput(
+                category: "transport",
+                activityType: "car",
+                value: 5.0,
+                unit: "mi",
+                notes: nil,
+                date: date
+            )
+            try await repository.save(input)
+        }
+        
+        // When
+        let streak = try await repository.calculateCurrentStreak()
+        
+        // Then
+        XCTAssertEqual(streak, 3, "Streak should be 3 for 3 consecutive days")
+    }
+    
+    func testCalculateCurrentStreak_WithGap() async throws {
+        // Given: 今天和前天有活动，昨天没有
+        let calendar = Calendar.current
+        
+        // 今天
+        let today = ActivityInput(
+            category: "transport",
+            activityType: "car",
+            value: 5.0,
+            unit: "mi",
+            notes: nil,
+            date: Date()
+        )
+        try await repository.save(today)
+        
+        // 前天（跳过昨天）
+        guard let twoDaysAgo = calendar.date(byAdding: .day, value: -2, to: Date()) else {
+            XCTFail("Failed to create date")
+            return
+        }
+        let activity = ActivityInput(
+            category: "transport",
+            activityType: "car",
+            value: 5.0,
+            unit: "mi",
+            notes: nil,
+            date: twoDaysAgo
+        )
+        try await repository.save(activity)
+        
+        // When
+        let streak = try await repository.calculateCurrentStreak()
+        
+        // Then: streak 应该只有 1（只有今天）
+        XCTAssertEqual(streak, 1, "Streak should be 1 when yesterday has no activities")
+    }
+    
+    func testCalculateCurrentStreak_NoActivities() async throws {
+        // Given: 没有任何活动
+        
+        // When
+        let streak = try await repository.calculateCurrentStreak()
+        
+        // Then
+        XCTAssertEqual(streak, 0, "Streak should be 0 when no activities")
+    }
+    
+    func testCalculateCurrentStreak_SingleDay() async throws {
+        // Given: 只有今天有活动
+        let input = ActivityInput(
+            category: "transport",
+            activityType: "car",
+            value: 5.0,
+            unit: "mi",
+            notes: nil,
+            date: Date()
+        )
+        try await repository.save(input)
+        
+        // When
+        let streak = try await repository.calculateCurrentStreak()
+        
+        // Then
+        XCTAssertEqual(streak, 1, "Streak should be 1 for single day")
+    }
+    
+    func testCalculateCurrentStreak_LongStreak() async throws {
+        // Given: 连续 30 天有活动
+        let calendar = Calendar.current
+        for dayOffset in 0..<30 {
+            guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else {
+                continue
+            }
+            
+            let input = ActivityInput(
+                category: "transport",
+                activityType: "car",
+                value: 5.0,
+                unit: "mi",
+                notes: nil,
+                date: date
+            )
+            try await repository.save(input)
+        }
+        
+        // When
+        let streak = try await repository.calculateCurrentStreak()
+        
+        // Then
+        XCTAssertEqual(streak, 30, "Streak should be 30 for 30 consecutive days")
+    }
 }

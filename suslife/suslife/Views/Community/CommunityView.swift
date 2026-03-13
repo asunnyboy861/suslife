@@ -16,9 +16,11 @@ struct CommunityView: View {
     @State private var totalActivities: Int = 0
     @State private var currentStreak: Int = 0
     @State private var isLoading = false
+    @State private var errorMessage: String = ""
+    @State private var showErrorAlert = false
+    @State private var showRetryButton = false
     
     private let repository = CoreDataActivityRepository()
-    private let userProfileRepository: UserRepositoryProtocol = LocalUserRepository()
     
     var body: some View {
         ScrollView {
@@ -55,6 +57,18 @@ struct CommunityView: View {
         }
         .refreshable {
             await loadData()
+        }
+        .alert("Error", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
+            if showRetryButton {
+                Button("Retry") {
+                    Task {
+                        await loadData()
+                    }
+                }
+            }
+        } message: {
+            Text(errorMessage)
         }
     }
     
@@ -309,6 +323,7 @@ struct CommunityView: View {
     
     private func loadData() async {
         isLoading = true
+        showRetryButton = false
         
         do {
             // Load ranking data
@@ -318,10 +333,18 @@ struct CommunityView: View {
             // Load statistics
             totalCO2Saved = try await repository.calculateTotalCO2Saved()
             totalActivities = try await repository.fetchTotalActivities()
-            // Get streak from UserProfile (convert weeks to days for display)
-            let profile = try await userProfileRepository.getUserProfile()
-            currentStreak = Int(profile.weeklyStreak) * 7  // Convert weeks to days
+            // Calculate actual streak (consecutive days with activities)
+            currentStreak = try await repository.calculateCurrentStreak()
+            
+            // Clear error state on success
+            errorMessage = ""
+            showErrorAlert = false
+            showRetryButton = false
         } catch {
+            // User-friendly error message
+            errorMessage = "Failed to load your progress. Please check your connection and try again."
+            showErrorAlert = true
+            showRetryButton = true
             print("Error loading progress data: \(error)")
         }
         

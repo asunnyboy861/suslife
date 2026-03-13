@@ -24,9 +24,14 @@ class LogActivityViewModel: ObservableObject {
     // MARK: - Dependencies
     
     private let repository: ActivityRepositoryProtocol
+    private let achievementService: AchievementService
     
-    init(repository: ActivityRepositoryProtocol = CoreDataActivityRepository()) {
+    init(
+        repository: ActivityRepositoryProtocol = CoreDataActivityRepository(),
+        achievementService: AchievementService
+    ) {
         self.repository = repository
+        self.achievementService = achievementService
     }
     
     // MARK: - Public Methods
@@ -63,6 +68,12 @@ class LogActivityViewModel: ObservableObject {
                 co2Amount: activity.co2Emission,
                 category: category
             )
+            
+            // Check achievements immediately after saving
+            // Note: Achievement check happens asynchronously
+            Task {
+                await achievementService.checkAchievements()
+            }
             
             await MainActor.run {
                 showSuccess = true

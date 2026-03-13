@@ -53,5 +53,24 @@
 	<string>SusLife reads your walking, cycling, and step data from Apple Health to calculate your carbon footprint savings from active transportation.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>SusLife does not write data to Apple Health.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>feedback-board.iocompile67692.workers.dev</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>

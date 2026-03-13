@@ -15,6 +15,8 @@ struct DashboardView: View {
     @State private var selectedCategory: String? = nil
     @State private var recommendations: [Recommendation] = []
     @State private var activityObserver: NSObjectProtocol?
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
     
     var body: some View {
         NavigationView {
@@ -74,9 +76,15 @@ struct DashboardView: View {
                 }
             }
             .task {
-                await viewModel.loadData()
-                await achievementService.checkAchievements()
-                recommendations = (try? await recommendationService.getRecommendations()) ?? []
+                do {
+                    await viewModel.loadData()
+                    await achievementService.checkAchievements()
+                    recommendations = try await recommendationService.getRecommendations()
+                } catch {
+                    errorMessage = "Failed to load dashboard data. Please check your connection and try again."
+                    showErrorAlert = true
+                    print("Error loading dashboard data: \(error)")
+                }
             }
             .onAppear {
                 setupActivityObserver()
@@ -86,9 +94,19 @@ struct DashboardView: View {
                     NotificationCenter.default.removeObserver(observer)
                 }
             }
+            .alert("Error", isPresented: $showErrorAlert) {
+                Button("OK", role: .cancel) { }
+                Button("Retry") {
+                    Task {
+                        await viewModel.loadData()
+                    }
+                }
+            } message: {
+                Text(errorMessage)
+            }
         }
     }
-    
+
     private func setupActivityObserver() {
         activityObserver = ActivityEvent.observeActivitySaved { co2Amount, category in
             Task {

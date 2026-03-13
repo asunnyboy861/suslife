@@ -51,6 +51,11 @@ protocol ActivityRepositoryProtocol {
     
     /// Get activity count for streak calculation
     func fetchActivityCount(for dateRange: DateRange) async throws -> Int
+    
+    /// Calculate current streak (consecutive days with activities)
+    /// Returns the number of consecutive days from today backwards
+    /// where the user logged at least one activity each day
+    func calculateCurrentStreak() async throws -> Int
 }
 
 /// Input model for creating activities (decoupled from CoreData)

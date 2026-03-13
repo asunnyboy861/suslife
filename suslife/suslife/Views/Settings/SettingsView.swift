@@ -19,6 +19,7 @@ struct SettingsView: View {
     @StateObject private var cloudKitService = CloudKitSyncService.shared
     @State private var showingReminderPicker = false
     @State private var showingExportSheet = false
+    @State private var showingContactSupport = false
     
     var body: some View {
         NavigationView {
@@ -40,6 +41,9 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .sheet(isPresented: $showingExportSheet) {
                 ExportView()
+            }
+            .sheet(isPresented: $showingContactSupport) {
+                ContactSupportView()
             }
             .task {
                 await cloudKitService.checkAccountStatus()
@@ -216,6 +220,19 @@ struct SettingsView: View {
                 Text(RegionManager.shared.currentRegion.emissionFactors.source)
                     .foregroundColor(.secondary)
                     .font(.caption)
+            }
+            
+            Button(action: { showingContactSupport = true }) {
+                HStack {
+                    Image(systemName: "envelope.fill")
+                        .foregroundColor(AppColors.primary)
+                    Text("Contact Support")
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+                }
             }
         }
     }

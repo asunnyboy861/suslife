@@ -250,6 +250,55 @@ final class CoreDataActivityRepository: ActivityRepositoryProtocol {
         return activities.count
     }
     
+    /// Calculates the current streak of consecutive days with logged activities.
+    /// 
+    /// This method counts backwards from today, checking each day for at least one activity.
+    /// The streak breaks when a day with no activities is encountered.
+    /// 
+    /// - Returns: The number of consecutive days (including today) with at least one activity
+    /// - Throws: CoreData errors if fetch fails
+    /// 
+    /// Example:
+    /// - User logged activities today, yesterday, and 2 days ago: returns 3
+    /// - User logged activities today and 2 days ago (skipped yesterday): returns 1
+    /// - User has no activities: returns 0
+    func calculateCurrentStreak() async throws -> Int {
+        let context = coreDataStack.mainContext
+        
+        return try await context.perform {
+            let calendar = Calendar.current
+            var streak = 0
+            var currentDate = Date()
+            
+            // Check up to 365 days back (reasonable limit)
+            for _ in 0..<365 {
+                let startOfDay = calendar.startOfDay(for: currentDate)
+                let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+                
+                let request: NSFetchRequest<CarbonActivity> = CarbonActivity.fetchRequest()
+                request.predicate = NSPredicate(
+                    format: "date >= %@ AND date < %@",
+                    startOfDay as NSDate,
+                    endOfDay as NSDate
+                )
+                request.fetchLimit = 1  // Only need to know if any exist
+                
+                let count = try context.count(for: request)
+                
+                if count > 0 {
+                    streak += 1
+                    // Move to previous day
+                    currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+                } else {
+                    // Streak broken
+                    break
+                }
+            }
+            
+            return streak
+        }
+    }
+    
     // MARK: - Private Helpers
     
     private func getDateRange(for dateRange: DateRange, calendar: Calendar) -> (start: Date, end: Date) {
