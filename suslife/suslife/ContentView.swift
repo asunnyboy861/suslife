@@ -17,7 +17,7 @@ struct ContentView: View {
             
             CommunityView()
                 .tabItem {
-                    Label("Community", systemImage: "person.2.fill")
+                    Label("My Progress", systemImage: "chart.line.uptrend.xyaxis")
                 }
             
             SettingsView()
