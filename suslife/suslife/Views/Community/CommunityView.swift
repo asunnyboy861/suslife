@@ -21,6 +21,9 @@ struct CommunityView: View {
     @State private var showErrorAlert = false
     @State private var showRetryButton = false
     
+    // Activity observer for real-time updates
+    @State private var activityObserver: NSObjectProtocol?
+    
     private let repository = CoreDataActivityRepository()
     
     var body: some View {
@@ -52,6 +55,14 @@ struct CommunityView: View {
             .padding()
         }
         .navigationTitle("My Progress")
+        .onAppear {
+            setupActivityObserver()
+        }
+        .onDisappear {
+            if let observer = activityObserver {
+                NotificationCenter.default.removeObserver(observer)
+            }
+        }
         .task {
             await loadData()
             await achievementService.checkAchievements()
@@ -350,6 +361,16 @@ struct CommunityView: View {
         }
         
         isLoading = false
+    }
+    
+    private func setupActivityObserver() {
+        let repository = self.repository
+        activityObserver = ActivityEvent.observeActivitySaved { co2Amount, category in
+            Task { @MainActor in
+                await self.loadData()
+                await self.achievementService.checkAchievements()
+            }
+        }
     }
 }
 
