@@ -2,14 +2,15 @@
 //  CommunityView.swift
 //  suslife
 //
-//  Community View - Personal progress tracking (REAL DATA ONLY)
+//  Community View - Personal progress tracking
+//  Modified: Use @EnvironmentObject to receive injected services
 //
 
 import SwiftUI
 
 struct CommunityView: View {
-    @StateObject private var rankingService = PersonalRankingService()
-    @StateObject private var achievementService = AchievementService()
+    @EnvironmentObject var achievementService: AchievementService
+    @EnvironmentObject var rankingService: PersonalRankingService
     
     // Direct data from repository
     @State private var totalCO2Saved: Double = 0
@@ -355,5 +356,7 @@ struct CommunityView: View {
 #Preview {
     NavigationView {
         CommunityView()
+            .environmentObject(AchievementService())
+            .environmentObject(PersonalRankingService())
     }
 }
